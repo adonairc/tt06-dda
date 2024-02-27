@@ -47,10 +47,10 @@ euler_integrator int2(.out(v2), .funct(-v1xK_M-v2xD_M), .dt(dt), .ic(ic2), .clk(
 endmodule
 
 /// Euler integration
-module euler_integrator(out, funct, en, clk, rst_n, dt, ic);
+module euler_integrator(out, funct, clk, rst_n, dt, ic);
 	output signed [26:0] out; // state variable
 	input signed [26:0] funct; // the dV/dt function
-	input clk, rst, en;
+	input clk, rst_n;
 	input [3:0] dt; // time step in units of SHIFT right
 	input signed [26:0] ic; // initial conditions
 
@@ -59,13 +59,10 @@ module euler_integrator(out, funct, en, clk, rst_n, dt, ic);
 
 	always @(posedge clk)
 	begin
-		if(en)
-		begin	
 			if (!rst_n)
 				v1 <= ic;
 			else
 				v1 <= v1new;
-		end
 	end
 	// compute new state variable with dt = 2>>dt
 	// v1(n+1) = v1(n) = dt*funct(n)
