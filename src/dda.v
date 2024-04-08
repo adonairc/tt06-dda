@@ -32,17 +32,17 @@ assign dv2_dt = {~dv2_dt_sum[N-1],dv2_dt_sum[N-2:0]};
 // Damped spring-mass equations
 // dv1/dt = v2
 // dv2/dt = (-k/m)*v1 - (d/m)*v2
-euler_integrator  #(.N(N),.ES(ES)) int1(.out(v1), .funct(v2), .dt(dt), .ic(ic1), .clk(clk), .rst(rst), .en(en));
-euler_integrator  #(.N(N),.ES(ES)) int2(.out(v2), .funct(dv2_dt), .dt(dt), .ic(ic2), .clk(clk), .rst(rst), .en(en));
+euler_integrator  #(.N(N),.ES(ES)) int1(.out(v1), .funct(v2), .dt(dt), .ic(ic1), .clk(clk), .rst_n(rst_n), .en(en));
+euler_integrator  #(.N(N),.ES(ES)) int2(.out(v2), .funct(dv2_dt), .dt(dt), .ic(ic2), .clk(clk), .rst_n(rst_n), .en(en));
 
 endmodule
 
 /// Euler integrator
-module euler_integrator(out, funct, en, clk, rst, dt, ic);
+module euler_integrator(out, funct, en, clk, rst_n, dt, ic);
 	parameter N = 16;
 	parameter ES = 2;
 
-	input clk, rst, en;
+	input clk, rst_n, en;
 	output [N-1:0] out; // state variable
 	input [N-1:0] funct; // the dV/dt function
 	input [N-1:0] dt; // time step
