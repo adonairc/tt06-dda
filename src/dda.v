@@ -13,9 +13,10 @@ parameter N = 16;
 parameter ES = 2;
 
 // 2nd order system state variables
-wire [N-1:0] v1, v2;
+// wire [N-1:0] v1, v2;
 
 wire [N-1:0] v1xK_M, v2xD_M;
+
 reg [N-1:0] dv2_dt_sum;
 wire [N-1:0] dv2_dt;
 

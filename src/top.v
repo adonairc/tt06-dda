@@ -36,8 +36,8 @@ module tt_um_dda (
 
 	// Connect UART with RP4020
 	wire uart_tx, uart_rx;
-	assign ui_in[3] = uart_tx;
-	assign uo_out[4] = uart_rx;
+	assign  uart_tx = ui_in[3];
+	assign  uart_rx = uo_out[4];
 
 	// UART interface
 	reg uart_transmit;
