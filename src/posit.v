@@ -1,3 +1,5 @@
+`default_nettype none
+
 module posit_add (in1, in2, out, inf, zero);
 
 function [31:0] log2;

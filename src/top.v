@@ -3,11 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-`define default_netname none
-`include "uart.v"
-`include "posit.v"
-`include "dda.v"
-
+`default_nettype none
 module tt_um_dda (
     input  wire [7:0] ui_in,    // Dedicated inputs
     output wire [7:0] uo_out,   // Dedicated outputs

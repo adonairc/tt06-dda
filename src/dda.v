@@ -1,3 +1,5 @@
+`default_nettype none
+
 module dda (
     input clk,
     input rst_n,
@@ -5,7 +7,7 @@ module dda (
     output [N-1:0] v1, v2,
     input [N-1:0] ic1, ic2,
     input [N-1:0] vK_M, vD_M,
-    input [N-1:0] dt,
+    input [N-1:0] dt
 );
 parameter N = 16;
 parameter ES = 2;

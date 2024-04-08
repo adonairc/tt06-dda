@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 // 
+`default_nettype none
 module uart (
     input clk, // The master clock for this module
     input rst_n, // Synchronous reset.
