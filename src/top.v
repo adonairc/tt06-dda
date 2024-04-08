@@ -19,6 +19,14 @@ module tt_um_dda (
 	// assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
 	assign uio_out = 0;
 	assign uio_oe  = 0;
+	assign uo_out[0] = 0;
+	assign uo_out[1] = 0;
+	assign uo_out[2] = 0;
+	assign uo_out[3] = 0;
+	assign uo_out[5] = 0;
+	assign uo_out[6] = 0;
+	assign uo_out[7] = 0;
+
 
 
 	parameter N = 16;
