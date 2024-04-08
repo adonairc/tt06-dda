@@ -1,89 +1,94 @@
-/*
- * Copyright (c) 2023 Your Name
- * SPDX-License-Identifier: Apache-2.0
- */
-
-`define default_netname none
-
-module tt_um_dda (
-    input  wire [7:0] ui_in,    // Dedicated inputs
-    output wire [7:0] uo_out,   // Dedicated outputs
-    input  wire [7:0] uio_in,   // IOs: Input path
-    output wire [7:0] uio_out,  // IOs: Output path
-    output wire [7:0] uio_oe,   // IOs: Enable path (active high: 0=input, 1=output)
-    input  wire       ena,      // will go high when the design is enabled
-    input  wire       clk,      // clock
-    input  wire       rst_n     // reset_n - low to reset
+module dda (
+    input clk,
+    input rst_n,
+	input en,
+    output [N-1:0] v1, v2,
+    input [N-1:0] ic1, ic2,
+    input [N-1:0] vK_M, vD_M,
+    input [N-1:0] dt,
 );
+parameter N = 16;
+parameter ES = 2;
 
-// All output pins must be assigned. If not used, assign to 0.
-assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-assign uio_out = 0;
-assign uio_oe  = 0;
+// 2nd order system state variables
+wire [N-1:0] v1, v2;
 
-wire signed [26:0] v1, v2;
+wire [N-1:0] v1xK_M, v2xD_M;
+reg [N-1:0] dv2_dt_sum;
+wire [N-1:0] dv2_dt;
 
-// 2nd order systyem state variables
-// wire signed [26:0] v1, v2;
+posit_mult #(.N(N),.ES(ES)) K_M(.in1(v1), .in2(vK_M), .out(v1xK_M)); // Multiply v1 by k/m
+posit_mult #(.N(N),.ES(ES)) D_M(.in1(v2), .in2(vD_M), .out(v2xD_M)); // Multiply v2 by d/m
 
-// signed mult output
-wire signed [26:0] v1xK_M, v2xD_M;
-wire [3:0] dt;
-wire [26:0] ic1,ic2;
+// Calculate (-k/m)*v1 - (d/m)*v2 
+// first add v1xK_M and v2xD_M
+posit_add #(.N(N),.ES(ES)) dv2_dt_sum0(.in1(v1xK_M), .in2(v2xD_M), .out(dv2_dt_sum));
+// and then multiply by -1
+assign dv2_dt = {~dv2_dt_sum[N-1],dv2_dt_sum[N-2:0]};
 
-assign dt = 4'b1001;
-assign ic2 = 27'b000101000000000000000000000;
-assign ic1 = 27'b000000000000000000000000000;
-
-signed_mult K_M(v1xK_M, v1, 27'h0080000); // Mult v1 by k/m
-signed_mult D_M(v2xD_M, v2, 27'h0040000); // Mult v2 by d/m
 
 // Damped spring-mass equations
 // dv1/dt = v2
 // dv2/dt = (-k/m)*v1 - (d/m)*v2
-euler_integrator int1(.out(v1), .funct(v2), .dt(dt), .ic(ic1), .clk(clk), .rst_n(rst_n));
-euler_integrator int2(.out(v2), .funct(-v1xK_M-v2xD_M), .dt(dt), .ic(ic2), .clk(clk), .rst_n(rst_n));
+euler_integrator  #(.N(N),.ES(ES)) int1(.out(v1), .funct(v2), .dt(dt), .ic(ic1), .clk(clk), .rst(rst), .en(en));
+euler_integrator  #(.N(N),.ES(ES)) int2(.out(v2), .funct(dv2_dt), .dt(dt), .ic(ic2), .clk(clk), .rst(rst), .en(en));
 
 endmodule
 
-/// Euler integration
-module euler_integrator(out, funct, clk, rst_n, dt, ic);
-	output signed [26:0] out; // state variable
-	input signed [26:0] funct; // the dV/dt function
-	input clk, rst_n;
-	input [3:0] dt; // time step in units of SHIFT right
-	input signed [26:0] ic; // initial conditions
+/// Euler integrator
+module euler_integrator(out, funct, en, clk, rst, dt, ic);
+	parameter N = 16;
+	parameter ES = 2;
 
-	wire signed [26:0] out, v1new;
-	reg signed [26:0] v1;
+	input clk, rst, en;
+	output [N-1:0] out; // state variable
+	input [N-1:0] funct; // the dV/dt function
+	input [N-1:0] dt; // time step
+	input [N-1:0] ic; // initial condition
+
+	wire [N-1:0] out, v1new;
+	reg [N-1:0] v1;
+
+	wire [N-1:0] out_mult;
+	reg zero_mult, inf_mult;
+	reg zero_add, inf_add;
+
+	// compute new state variable with dt 
+	// v1(n+1) = v1(n) = dt*funct(n)
+
+	posit_mult  #(
+		.N(N),
+		.ES(ES)
+	) mult (
+		.in1(funct),
+		.in2(dt),
+		.out(out_mult),
+		.inf(inf_mult),
+		.zero(zero_mult)
+	);
+
+	posit_add #(
+		.N(N),
+		.ES(ES)
+	)
+	posit_add0(
+		.in1(out_mult),
+		.in2(v1),
+		.out(v1new),
+		.inf(inf_add),
+		.zero(zero_add)
+	);
 
 	always @(posedge clk)
 	begin
+		if(en) begin	
 			if (!rst_n)
 				v1 <= ic;
 			else
 				v1 <= v1new;
+		end
 	end
-	// compute new state variable with dt = 2>>dt
-	// v1(n+1) = v1(n) = dt*funct(n)
-	assign v1new = v1 + (funct>>>9);
 	assign out = v1;
+
 endmodule
-
-/// signed multiplication of 7.20 fixed point 2' complement
-
-module signed_mult (out,a,b);
-	output signed [26:0] out;
-	input signed [26:0] a;
-	input signed [26:0] b;
-
-	// intermediate full bit length
-	// wire signed [26:0]	out;
-	wire signed [53:0] mult_out;
-	
-	assign mult_out = a * b;
-	// select bits for 7.20 fixed point
-	assign out = {mult_out[53], mult_out[45:20]};
-endmodule
-
 
