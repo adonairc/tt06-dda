@@ -10,6 +10,7 @@ Hardware accelerator to solve Lorenz nonlinear differential equations submitted 
 A Digital Differential Analyzer (DDA) is a digital circuit that use integrators to solve differential equations (DE) in digital systems. This project implements a simple Euler integration algorithm in hardware using a new floating-point numerical system called posit (see [below](#why-posit-numbers)). To program a DDA one has to wire basic components such as adders, multipliers and integrators together to express the desired set of equations, in a similar fashion as the old analog computers were programmed. 
 
 The Lorenz equation is decribed by a set of three coupled ordinary differential equations given by,
+
 $$
 \begin{align}
 \frac{dx}{dt} &= \sigma (y-x)\\
