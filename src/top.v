@@ -17,10 +17,12 @@ module tt_um_dda (
 
 	// All output pins must be assigned. If not used, assign to 0.
 	// assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-	assign uio_out = 0;
+	// assign uio_out = 0;
 	assign uio_oe  = 0;
-	assign uo_out  = 0;
+	// assign uo_out  = 0;
+
 	
+
 	parameter N = 16;
 	parameter ES = 1;
 	parameter REG_SIZE = 14; // Register file size in bytes
@@ -150,4 +152,7 @@ module tt_um_dda (
 	assign beta = {parameters[8], parameters[9]};
 	assign rho = {parameters[10], parameters[11]};
 	assign dt = {parameters[12], parameters[13]};
+
+	assign uo_out = x;
+	assign uio_out = y;
 endmodule
