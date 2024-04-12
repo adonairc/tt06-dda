@@ -23,6 +23,7 @@ module tt_um_dda (
 	assign uo_out[1] = 0;
 	assign uo_out[2] = 0;
 	assign uo_out[3] = 0;
+	assign uo_out[4] = 0;
 	assign uo_out[5] = 0;
 	assign uo_out[6] = 0;
 	assign uo_out[7] = 0;
@@ -37,37 +38,37 @@ module tt_um_dda (
 	wire rst;
 	assign rst = ~rst_n;
 
-	// Connect UART pins
-	wire uart_tx, uart_rx;
-	assign  uart_rx = ui_in[3];
-	assign  uart_tx = uo_out[4];
+	// // Connect UART pins
+	// wire uart_tx, uart_rx;
+	// assign  uart_rx = ui_in[3];
+	// assign  uart_tx = uo_out[4];
 
-	// UART interface
-	reg uart_transmit;
-	reg [7:0] uart_tx_byte;
-	reg uart_received;
-	reg [7:0] uart_rx_byte;
-	wire uart_is_receiving;
-	wire uart_is_transmitting;
-	wire uart_recv_error;
+	// // UART interface
+	// reg uart_transmit;
+	// reg [7:0] uart_tx_byte;
+	// reg uart_received;
+	// reg [7:0] uart_rx_byte;
+	// wire uart_is_receiving;
+	// wire uart_is_transmitting;
+	// wire uart_recv_error;
 
-	uart #(
-		.BAUD_RATE(BAUD_RATE),                 // The baud rate in kilobits/s
-		.CLK_FREQ(CLK_FREQ)           // The master clock frequency (6 MHz)
-	)
-	uart0(
-		.clk(clk),                    // The master clock for this module
-		.rst(rst),                      // Synchronous reset
-		.rx(uart_rx),                // Incoming serial line
-		.tx(uart_tx),                // Outgoing serial line
-		.transmit(uart_transmit),              // Signal to transmit
-		.tx_byte(uart_tx_byte),                // Byte to transmit
-		.received(uart_received),              // Indicated that a byte has been received
-		.rx_byte(uart_rx_byte),                // Byte received
-		.is_receiving(uart_is_receiving),      // Low when receive line is idle
-		.is_transmitting(uart_is_transmitting),// Low when transmit line is idle
-		.recv_error(uart_recv_error)           // Indicates error in receiving packet
-	);
+	// uart #(
+	// 	.BAUD_RATE(BAUD_RATE),                 // The baud rate in kilobits/s
+	// 	.CLK_FREQ(CLK_FREQ)           // The master clock frequency (6 MHz)
+	// )
+	// uart0(
+	// 	.clk(clk),                    // The master clock for this module
+	// 	.rst(rst),                      // Synchronous reset
+	// 	.rx(uart_rx),                // Incoming serial line
+	// 	.tx(uart_tx),                // Outgoing serial line
+	// 	.transmit(uart_transmit),              // Signal to transmit
+	// 	.tx_byte(uart_tx_byte),                // Byte to transmit
+	// 	.received(uart_received),              // Indicated that a byte has been received
+	// 	.rx_byte(uart_rx_byte),                // Byte received
+	// 	.is_receiving(uart_is_receiving),      // Low when receive line is idle
+	// 	.is_transmitting(uart_is_transmitting),// Low when transmit line is idle
+	// 	.recv_error(uart_recv_error)           // Indicates error in receiving packet
+	// );
 
 
 	// Dynamical system parameters
@@ -97,14 +98,14 @@ module tt_um_dda (
 	);
 
 	reg [7:0] parameters [REG_SIZE];
-	reg [7:0] rx_counter, tx_counter;
+	// reg [7:0] rx_counter, tx_counter;
 	wire [7:0] state [OUT_SIZE];
 
 	always @(posedge clk) begin
 		if (rst) begin
-			rx_counter <= 1'b0;
-			tx_counter <= 1'b0;
-			uart_transmit <= 1'b1;
+			// rx_counter <= 1'b0;
+			// tx_counter <= 1'b0;
+			// uart_transmit <= 1'b1;
 			en_dda <= 1'b1;
 
 			// Initial settings
@@ -131,13 +132,13 @@ module tt_um_dda (
 
 		end
 
-		uart_transmit <= 1'b1;
-		if (tx_counter < OUT_SIZE) begin
-			uart_tx_byte <= state[tx_counter];
-			tx_counter <= tx_counter + 1;
-		end else begin
-			tx_counter <= 0;
-		end
+		// uart_transmit <= 1'b1;
+		// if (tx_counter < OUT_SIZE) begin
+		// 	uart_tx_byte <= state[tx_counter];
+		// 	tx_counter <= tx_counter + 1;
+		// end else begin
+		// 	tx_counter <= 0;
+		// end
 	end
 
 	// 3 state variables
