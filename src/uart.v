@@ -23,7 +23,7 @@
 `default_nettype none
 module uart (
     input clk, // The master clock for this module
-    input rst_n, // Synchronous reset.
+    input rst, // Synchronous reset.
     input rx, // Incoming serial line
     output tx, // Outgoing serial line
     input transmit, // Signal to transmit
@@ -80,7 +80,7 @@ assign tx = tx_out;
 assign is_transmitting = tx_state != TX_IDLE;
  
 always @(posedge clk) begin
-	if (!rst_n) begin
+	if (rst) begin
 		recv_state = RX_IDLE;
 		tx_state = TX_IDLE;
 	end

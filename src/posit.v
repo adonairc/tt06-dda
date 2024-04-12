@@ -1,4 +1,4 @@
-`default_nettype none
+`timescale 1ns / 1ps
 
 module posit_add (in1, in2, out, inf, zero);
 
@@ -13,7 +13,7 @@ endfunction
 
 parameter N = 16;
 parameter Bs = log2(N); 
-parameter ES = 3;
+parameter ES = 1;
 
 input [N-1:0] in1, in2;
 output [N-1:0] out;
@@ -159,7 +159,7 @@ endfunction
 
 parameter N = 16;
 parameter Bs = log2(N); 
-parameter ES = 3;
+parameter ES = 1;
 
 input [N-1:0] in1, in2;
 output [N-1:0] out;
