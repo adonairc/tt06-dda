@@ -25,8 +25,8 @@ module tt_um_dda (
 
 	parameter N = 16;
 	parameter ES = 1;
-	parameter REG_SIZE = 14; // Register file size in bytes
-	parameter OUT_SIZE = 6; // Output size in bytes
+	parameter REG_SIZE = 6; // Register file size in bytes
+	parameter OUT_SIZE = 4; // Output size in bytes
 	// parameter CLK_FREQ = 12000000; // Clock frequency (12 MHz)
 	// parameter BAUD_RATE = 9600; // UART baud rate
 
@@ -67,8 +67,8 @@ module tt_um_dda (
 
 
 	// Dynamical system parameters
-	wire [N-1:0] icx, icy, icz;
-    wire [N-1:0] sigma,beta,rho;
+	wire [N-1:0] icx, icy;
+    wire [N-1:0] mu;
     wire [N-1:0] dt;
 	reg en_dda;
 
@@ -82,13 +82,9 @@ module tt_um_dda (
 		.en(en_dda),
 		.x(x),
 		.y(y),
-		.z(z),
 		.icx(icx),
 		.icy(icy),
-		.icz(icz),
-		.sigma(sigma),
-		.beta(beta),
-		.rho(rho),
+		.mu(mu),
 		.dt(dt)
 	);
 
@@ -110,21 +106,8 @@ module tt_um_dda (
 			parameters[2] <= 8'h14;  // icy = 0.1
 			parameters[3] <= 8'hCD; 
 			
-			parameters[4] <= 8'h72; // icz = 25.0
+			parameters[4] <= 8'h72; // mu = 25.0
 			parameters[5] <= 8'h40; 
-			
-			parameters[6] <= 8'h6A; // sigma = 10.0
-			parameters[7] <= 8'h00; 
-			
-			parameters[8] <= 8'h55; // beta = 8/3
-			parameters[9] <= 8'h55; 
-			
-			parameters[10] <= 8'h73; // rho = 28.0
-			parameters[11] <= 8'h00; 
-			
-			parameters[12] <= 8'h04; // dt = 1/256
-			parameters[13] <= 8'h00; 
-
 		end
 
 		// uart_transmit <= 1'b1;
@@ -147,12 +130,9 @@ module tt_um_dda (
 	// 7 parameters
 	assign icx = {parameters[0], parameters[1]};
 	assign icy = {parameters[2], parameters[3]};
-	assign icz = {parameters[4], parameters[5]};
-	assign sigma = {parameters[6], parameters[7]};
-	assign beta = {parameters[8], parameters[9]};
-	assign rho = {parameters[10], parameters[11]};
-	assign dt = {parameters[12], parameters[13]};
+	assign mu = {parameters[4], parameters[5]};
+	assign dt = {parameters[6], parameters[7]};
 
-	assign uo_out = x;
-	assign uio_out = y;
+	assign uo_out = x[7:0];
+	assign uio_out = y[7:0];
 endmodule

@@ -2,9 +2,9 @@ module dda (
     input clk,
     input rst,
 	input en,
-    output [N-1:0] x,y,z, // Dynamic system state variables
-    input [N-1:0] icx, icy, icz, // Initial conditions
-    input [N-1:0] sigma, beta, rho, // Parameters
+    output [N-1:0] x,y, // Dynamic system state variables
+    input [N-1:0] icx, icy, // Initial conditions
+    input [N-1:0] mu,// Parameters
     input [N-1:0] dt // Time step
 );
 
@@ -13,29 +13,24 @@ parameter N = 16;
 parameter ES = 1;
 
 // Multiplications
-wire [N-1:0] w_mult_sigma_sub_y_x,  w_mult_x_sub_rho_z, w_mult_beta_z, w_mult_x_y;
+wire [N-1:0] w_mult1, w_mult2, w_mult3;
 
-posit_mult #(.N(N),.ES(ES)) mult_sigma_sub_y_x(.in1(sigma), .in2(w_sub_y_x), .out(w_mult_sigma_sub_y_x)); // Multiply sigma(y-x)
-posit_mult #(.N(N),.ES(ES)) mult_x_sub_rho_z(.in1(x), .in2(w_sub_rho_z), .out(w_mult_x_sub_rho_z)); // Multiply x(rho - z)
-posit_mult #(.N(N),.ES(ES)) mult_beta_z(.in1(z), .in2(beta), .out(w_mult_beta_z)); // Multiply beta z
-posit_mult #(.N(N),.ES(ES)) mult_x_y(.in1(x), .in2(y), .out(w_mult_x_y)); // Multiply x y
+posit_mult #(.N(N),.ES(ES)) mult1(.in1(x), .in2(x), .out(w_mult1)); // Multiply x*x
+posit_mult #(.N(N),.ES(ES)) mult2(.in1(mu), .in2(w_sub1), .out(w_mult2)); // Multiply mu*(1-x*x)
+posit_mult #(.N(N),.ES(ES)) mult3(.in1(w_mult2), .in2(y), .out(w_mult3)); // Multiply mu*(1-x*x)*y
 
 // Subtractions
-wire [N-1:0] w_sub_y_x, w_sub_rho_z, w_sub_xy_betaz, w_sub_mult_x_sub_rho_z_y;
+wire [N-1:0] w_sub1, w_sub2;
 
-posit_sub #(.N(N),.ES(ES)) sub_y_x(.in1(y), .in2(x), .out(w_sub_y_x)); // Subtract y - x
-posit_sub #(.N(N),.ES(ES)) sub_rho_z(.in1(rho), .in2(z), .out(w_sub_rho_z)); // Subtract rho - z
-posit_sub #(.N(N),.ES(ES)) sub_xy_betaz(.in1(w_mult_x_y), .in2(w_mult_beta_z), .out( w_sub_xy_betaz)); // Subtract xy - beta z
-posit_sub #(.N(N),.ES(ES)) sub_mult_x_sub_rho_z_y(.in1(w_mult_x_sub_rho_z), .in2(y), .out( w_sub_mult_x_sub_rho_z_y)); // Subtract x(rho - z) -y
+posit_sub #(.N(N),.ES(ES)) sub_1_mult_x_x(.in1(16'b0100000000000000), .in2(w_mult1), .out(w_sub1)); // Subtract 1 - x*x
+posit_sub #(.N(N),.ES(ES)) sub_rho_z(.in1(w_mult3), .in2(x), .out(w_sub2)); // Subtract mu*(1-x*x)y - x
 
-// Lorenz equation
-// dx/dt = sigma*(y - x)
-// dy/dt = x*(rho - z) - y
-// dz/dt = x*y - beta*z
+// Van der Pol equation
+// dx/dt = y
+// dy/dt = mu*(1 - x*x) - x
 
-euler_integrator  #(.N(N),.ES(ES)) int1(.out(x), .funct(w_mult_sigma_sub_y_x), .dt(dt), .ic(icx), .clk(clk), .rst(rst), .en(en));
-euler_integrator  #(.N(N),.ES(ES)) int2(.out(y), .funct(w_sub_mult_x_sub_rho_z_y), .dt(dt), .ic(icy), .clk(clk), .rst(rst), .en(en));
-euler_integrator  #(.N(N),.ES(ES)) int3(.out(z), .funct(w_sub_xy_betaz), .dt(dt), .ic(icz), .clk(clk), .rst(rst), .en(en));
+euler_integrator  #(.N(N),.ES(ES)) int1(.out(x), .funct(y), .dt(dt), .ic(icx), .clk(clk), .rst(rst), .en(en));
+euler_integrator  #(.N(N),.ES(ES)) int2(.out(y), .funct(w_sub2), .dt(dt), .ic(icy), .clk(clk), .rst(rst), .en(en));
 
 endmodule
 
