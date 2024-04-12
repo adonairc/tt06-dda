@@ -27,22 +27,17 @@ module tt_um_dda (
 	assign uo_out[6] = 0;
 	assign uo_out[7] = 0;
 
-
-
 	parameter N = 16;
-	parameter ES = 2;
-	parameter REG_SIZE = 10; // Register file size in bytes
-	parameter OUT_SIZE = 4; // Output size in bytes
-	parameter CLK_FREQ = 5000000; // Clock frequency (5 MHz)
+	parameter ES = 1;
+	parameter REG_SIZE = 14; // Register file size in bytes
+	parameter OUT_SIZE = 6; // Output size in bytes
+	parameter CLK_FREQ = 12000000; // Clock frequency (12 MHz)
 	parameter BAUD_RATE = 9600; // UART baud rate
 
-	integer i;
+	wire rst;
+	assign rst = ~rst_n;
 
-	// Register the reset on the negative edge of clock for safety
-	reg rst_reg_n;
-	always @(negedge clk) rst_reg_n <= rst_n;
-
-	// Connect UART with RP4020
+	// Connect UART pins
 	wire uart_tx, uart_rx;
 	assign  uart_rx = ui_in[3];
 	assign  uart_tx = uo_out[4];
@@ -62,9 +57,9 @@ module tt_um_dda (
 	)
 	uart0(
 		.clk(clk),                    // The master clock for this module
-		.rst_n(rst_reg_n),                      // Synchronous reset
-		.rx(uart_rx),                // Incoming serial line
-		.tx(uart_tx),                // Outgoing serial line
+		.rst(rst),                      // Synchronous reset
+		.rx(rx),                // Incoming serial line
+		.tx(tx),                // Outgoing serial line
 		.transmit(uart_transmit),              // Signal to transmit
 		.tx_byte(uart_tx_byte),                // Byte to transmit
 		.received(uart_received),              // Indicated that a byte has been received
@@ -76,77 +71,89 @@ module tt_um_dda (
 
 
 	// Dynamical system parameters
-	wire [N-1:0] ic1, ic2;
-    wire [N-1:0] vK_M, vD_M;
+	wire [N-1:0] icx, icy, icz;
+    wire [N-1:0] sigma,beta,rho;
     wire [N-1:0] dt;
 	reg en_dda;
 
-	// state variables (v1 and v2)
-	wire [N-1:0] v1, v2;
+	// state variables
+	wire [N-1:0] x,y,z;
 
-	// DDA instance
-	dda #(.N(N), .ES(ES)) dda0(
+	//Lorenz  DDA instance
+	dda #(.N(N), .ES(ES)) lorenz(
 		.clk(clk),
-		.rst_n(rst_reg_n),
+		.rst(rst),
 		.en(en_dda),
-		.v1(v1),
-		.v2(v2),
-		.ic1(ic1),
-		.ic2(ic2),
-		.vK_M(vK_M),
-		.vD_M(vD_M),
+		.x(x),
+		.y(y),
+		.z(z),
+		.icx(icx),
+		.icy(icy),
+		.icz(icz),
+		.sigma(sigma),
+		.beta(beta),
+		.rho(rho),
 		.dt(dt)
 	);
 
-	reg [7:0] registers [REG_SIZE];
-	reg [2:0] rx_counter, tx_counter;
-
-	wire [7:0] state [4];
+	reg [7:0] parameters [REG_SIZE];
+	reg [7:0] rx_counter, tx_counter;
+	wire [7:0] state [OUT_SIZE];
 
 	always @(posedge clk) begin
-		if (!rst_reg_n) begin
+		if (rst) begin
 			rx_counter <= 1'b0;
 			tx_counter <= 1'b0;
+			uart_transmit <= 1'b1;
+			en_dda <= 1'b1;
 
-			en_dda <= 1'b0;
-			uart_transmit <= 1'b0;
+			// Initial settings
+			parameters[0] <= 8'hC0; // icx = -1.0
+			parameters[1] <= 8'h00;
 			
-			for (i = 0; i < REG_SIZE; i = i + 1) begin
-			 registers[i] <= 8'h00;
-			end			
+			parameters[2] <= 8'h14;  // icy = 0.1
+			parameters[3] <= 8'hCD; 
+			
+			parameters[4] <= 8'h72; // icz = 25.0
+			parameters[5] <= 8'h40; 
+			
+			parameters[6] <= 8'h6A; // sigma = 10.0
+			parameters[7] <= 8'h00; 
+			
+			parameters[8] <= 8'h55; // beta = 8/3
+			parameters[9] <= 8'h55; 
+			
+			parameters[10] <= 8'h73; // rho = 28.0
+			parameters[11] <= 8'h00; 
+			
+			parameters[12] <= 8'h04; // dt = 1/256
+			parameters[13] <= 8'h00; 
+
 		end
 
-		if (rx_counter < REG_SIZE) begin
-			if (uart_received) begin // Receisves byte and store at the register file
-				registers[rx_counter] <= uart_rx_byte;
-				rx_counter <= rx_counter + 1;
-			end
-			uart_transmit <= 1'b0;
-			tx_counter <= 1'b0;
-			en_dda <= 1'b0;
-		end
-
-		else begin
-			if (tx_counter < OUT_SIZE+1 && !uart_is_transmitting) begin // Transmit output bytes
-				uart_transmit <= 1'b1;
-				uart_tx_byte <= state[tx_counter];
-				tx_counter <= tx_counter + 1;
-			end
-			if (tx_counter == OUT_SIZE+1) begin 
-				rx_counter <= 1'b0; // All output data was sent, starts receiving again
-				en_dda <= 1'b1;
-			end
+		uart_transmit <= 1'b1;
+		if (tx_counter < OUT_SIZE) begin
+			uart_tx_byte <= state[tx_counter];
+			tx_counter <= tx_counter + 1;
+		end else begin
+			tx_counter <= 0;
 		end
 	end
 
-	assign state[0] = v1[15:8];
-	assign state[1] = v1[7:0];
-	assign state[2] = v2[15:8];
-	assign state[3] = v2[7:0];
-	
-	assign ic1 = {registers[0], registers[1]};
-	assign ic2 = {registers[2], registers[3]};
-	assign vK_M = {registers[4], registers[5]};
-	assign vD_M = {registers[6], registers[7]};
-	assign dt = {registers[8], registers[9]};
+	// 3 state variables
+	assign state[0] = x[15:8];
+	assign state[1] = x[7:0];
+	assign state[2] = y[15:8];
+	assign state[3] = y[7:0];
+	assign state[4] = z[15:8];
+	assign state[5] = z[7:0];
+
+	// 7 parameters
+	assign icx = {parameters[0], parameters[1]};
+	assign icy = {parameters[2], parameters[3]};
+	assign icz = {parameters[4], parameters[5]};
+	assign sigma = {parameters[6], parameters[7]};
+	assign beta = {parameters[8], parameters[9]};
+	assign rho = {parameters[10], parameters[11]};
+	assign dt = {parameters[12], parameters[13]};
 endmodule

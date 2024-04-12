@@ -1,16 +1,33 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg)
 
-# Tiny Tapeout Verilog Project Template
+# DDA solver for Lorenz equations
 
-- [Read the documentation for project](docs/info.md)
+Hardware accelerator to solve Lorenz nonlinear differential equations submitted to [TinyTapeout 6](https://tinytapeout.com). 
+- [Read the technical documentation for this project](docs/info.md)
 
-## What is Tiny Tapeout?
+## What is a DDA solver?
 
-TinyTapeout is an educational project that aims to make it easier and cheaper than ever to get your digital designs manufactured on a real chip.
+A Digital Differential Analyzer (DDA) is a digital circuit that use integrators to solve differential equations (DE) in digital systems. This project implements a simple Euler integration algorithm in hardware using a new floating-point numerical system called posit (see [below](#why-posit-numbers)). To program a DDA one has to wire basic components such as adders, multipliers and integrators together to express the desired set of equations, in a similar fashion as the old analog computers were programmed. 
 
-To learn more and get started, visit https://tinytapeout.com.
+The Lorenz equation is decribed by a set of three coupled ordinary differential equations given by,
+$$
+\begin{align}
+\frac{dx}{dt} &= \sigma (y-x)\\
+\frac{dy}{dt} &= x(\rho-z) - y\\
+\frac{dz}{dt} &= xy - \beta z
+\end{align}
+$$
 
-## Verilog Projects
+
+
+![image](lorenz_dda.png)
+
+## Why posit numbers ?
+
+Posit number is a new way to encode and operate with floating point numbers in digital systems that is gaining attention for application in AI hardware accelerators. Compared to standard IEE 754 floating-point format, posits offer a few advantages including the ability to get more precision or dynamic range out of a given number of bits allowing a hardware designer to tailor 
+
+
+Dynamics range is given by $(2n-4)2^{es}\log_{10}2$
 
 1. Add your Verilog files to the `src` folder.
 2. Edit the [info.yaml](info.yaml) and update information about your project, paying special attention to the `source_files` and `top_module` properties. If you are upgrading an existing Tiny Tapeout project, check out our [online info.yaml migration tool](https://tinytapeout.github.io/tt-yaml-upgrade-tool/).
