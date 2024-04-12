@@ -94,7 +94,7 @@ module tt_um_dda (
 
 	reg [7:0] parameters [REG_SIZE];
 	// reg [7:0] rx_counter, tx_counter;
-	wire [7:0] state [OUT_SIZE];
+	// wire [7:0] state [OUT_SIZE];
 
 	always @(posedge clk) begin
 		if (rst) begin
@@ -137,12 +137,12 @@ module tt_um_dda (
 	end
 
 	// 3 state variables
-	assign state[0] = x[15:8];
-	assign state[1] = x[7:0];
-	assign state[2] = y[15:8];
-	assign state[3] = y[7:0];
-	assign state[4] = z[15:8];
-	assign state[5] = z[7:0];
+	// assign state[0] = x[15:8];
+	// assign state[1] = x[7:0];
+	// assign state[2] = y[15:8];
+	// assign state[3] = y[7:0];
+	// assign state[4] = z[15:8];
+	// assign state[5] = z[7:0];
 
 	// 7 parameters
 	assign icx = {parameters[0], parameters[1]};
