@@ -19,21 +19,14 @@ module tt_um_dda (
 	// assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
 	assign uio_out = 0;
 	assign uio_oe  = 0;
-	assign uo_out[0] = 0;
-	assign uo_out[1] = 0;
-	assign uo_out[2] = 0;
-	assign uo_out[3] = 0;
-	assign uo_out[4] = 0;
-	assign uo_out[5] = 0;
-	assign uo_out[6] = 0;
-	assign uo_out[7] = 0;
-
+	assign uo_out  = 0;
+	
 	parameter N = 16;
 	parameter ES = 1;
 	parameter REG_SIZE = 14; // Register file size in bytes
 	parameter OUT_SIZE = 6; // Output size in bytes
-	parameter CLK_FREQ = 12000000; // Clock frequency (12 MHz)
-	parameter BAUD_RATE = 9600; // UART baud rate
+	// parameter CLK_FREQ = 12000000; // Clock frequency (12 MHz)
+	// parameter BAUD_RATE = 9600; // UART baud rate
 
 	wire rst;
 	assign rst = ~rst_n;

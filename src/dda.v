@@ -7,12 +7,18 @@ module dda (
     input [N-1:0] sigma, beta, rho, // Parameters
     input [N-1:0] dt // Time step
 );
+
 // Posit parameters
 parameter N = 16;
 parameter ES = 1;
 
 // Multiplications
 wire [N-1:0] w_mult_sigma_sub_y_x,  w_mult_x_sub_rho_z, w_mult_beta_z, w_mult_x_y;
+
+posit_mult #(.N(N),.ES(ES)) mult_sigma_sub_y_x(.in1(sigma), .in2(w_sub_y_x), .out(w_mult_sigma_sub_y_x)); // Multiply sigma(y-x)
+posit_mult #(.N(N),.ES(ES)) mult_x_sub_rho_z(.in1(x), .in2(w_sub_rho_z), .out(w_mult_x_sub_rho_z)); // Multiply x(rho - z)
+posit_mult #(.N(N),.ES(ES)) mult_beta_z(.in1(z), .in2(beta), .out(w_mult_beta_z)); // Multiply beta z
+posit_mult #(.N(N),.ES(ES)) mult_x_y(.in1(x), .in2(y), .out(w_mult_x_y)); // Multiply x y
 
 // Subtractions
 wire [N-1:0] w_sub_y_x, w_sub_rho_z, w_sub_xy_betaz, w_sub_mult_x_sub_rho_z_y;
@@ -21,11 +27,6 @@ posit_sub #(.N(N),.ES(ES)) sub_y_x(.in1(y), .in2(x), .out(w_sub_y_x)); // Subtra
 posit_sub #(.N(N),.ES(ES)) sub_rho_z(.in1(rho), .in2(z), .out(w_sub_rho_z)); // Subtract rho - z
 posit_sub #(.N(N),.ES(ES)) sub_xy_betaz(.in1(w_mult_x_y), .in2(w_mult_beta_z), .out( w_sub_xy_betaz)); // Subtract xy - beta z
 posit_sub #(.N(N),.ES(ES)) sub_mult_x_sub_rho_z_y(.in1(w_mult_x_sub_rho_z), .in2(y), .out( w_sub_mult_x_sub_rho_z_y)); // Subtract x(rho - z) -y
-
-posit_mult #(.N(N),.ES(ES)) mult_sigma_sub_y_x(.in1(sigma), .in2(w_sub_y_x), .out(w_mult_sigma_sub_y_x)); // Multiply sigma(y-x)
-posit_mult #(.N(N),.ES(ES)) mult_x_sub_rho_z(.in1(x), .in2(w_sub_rho_z), .out(w_mult_x_sub_rho_z)); // Multiply x(rho - z)
-posit_mult #(.N(N),.ES(ES)) mult_beta_z(.in1(z), .in2(beta), .out(w_mult_beta_z)); // Multiply beta z
-posit_mult #(.N(N),.ES(ES)) mult_x_y(.in1(x), .in2(y), .out(w_mult_x_y)); // Multiply x y
 
 // Lorenz equation
 // dx/dt = sigma*(y - x)

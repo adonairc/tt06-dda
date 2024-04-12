@@ -1,5 +1,3 @@
-`timescale 1ns / 1ps
-
 module posit_add (in1, in2, out);
 
 function [31:0] log2;

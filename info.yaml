@@ -3,7 +3,7 @@ project:
   title:        "Digital Differential Analyzer (DDA)"      # Project title
   author:       "Adonai Cruz"      # Your name
   discord:      "arc5496"      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "Digital hardware to solve the differential equation of a damped spring-mass oscillator."      # One line description of what your project does
+  description:  "Hardware accelerator to solve the Lorenz equation."      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     5000000       # Clock frequency in Hz (or 0 if not applicable)
   wokwi_id: 0
