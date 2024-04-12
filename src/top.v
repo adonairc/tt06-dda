@@ -58,7 +58,7 @@ module tt_um_dda (
 	uart0(
 		.clk(clk),                    // The master clock for this module
 		.rst(rst),                      // Synchronous reset
-		.rx(uart_x),                // Incoming serial line
+		.rx(uart_rx),                // Incoming serial line
 		.tx(uart_tx),                // Outgoing serial line
 		.transmit(uart_transmit),              // Signal to transmit
 		.tx_byte(uart_tx_byte),                // Byte to transmit
