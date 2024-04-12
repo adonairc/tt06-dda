@@ -69,7 +69,6 @@ module euler_integrator(out, funct, en, clk, rst, dt, ic);
 	reg [N-1:0] v1;
 
 	wire [N-1:0] out_mult;
-	wire inf_add, inf_mult;
 
 	// compute new state variable with dt 
 	// v1(n+1) = v1(n) + dt*funct(n)
@@ -80,8 +79,7 @@ module euler_integrator(out, funct, en, clk, rst, dt, ic);
 	) mult (
 		.in1(funct),
 		.in2(dt),
-		.out(out_mult),
-		.inf(inf_mult)
+		.out(out_mult)
 	);
 
 	posit_add #(
@@ -91,8 +89,7 @@ module euler_integrator(out, funct, en, clk, rst, dt, ic);
 	add(
 		.in1(out_mult),
 		.in2(v1),
-		.out(v1new),
-		.inf(inf_add)
+		.out(v1new)
 	);
 
 	always @(posedge clk)

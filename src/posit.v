@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module posit_add (in1, in2, out, inf, zero);
+module posit_add (in1, in2, out);
 
 function [31:0] log2;
 input reg [31:0] value;
@@ -17,7 +17,7 @@ parameter ES = 1;
 
 input [N-1:0] in1, in2;
 output [N-1:0] out;
-output inf, zero;
+wire inf, zero;
 
 wire s1 = in1[N-1];
 wire s2 = in2[N-1];
@@ -146,7 +146,7 @@ assign out = inf|zero|(~DSR_left_out[N-1]) ? {inf,{N-1{1'b0}}} : {ls, tmp1_oN[N-
 endmodule
 
 
-module posit_mult(in1, in2, out, inf, zero);
+module posit_mult(in1, in2, out);
 
 function [31:0] log2;
 input reg [31:0] value;
@@ -163,7 +163,7 @@ parameter ES = 1;
 
 input [N-1:0] in1, in2;
 output [N-1:0] out;
-output inf, zero;
+wire inf, zero;
 
 wire s1 = in1[N-1];
 wire s2 = in2[N-1];
