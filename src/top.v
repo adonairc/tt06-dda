@@ -20,6 +20,13 @@ module tt_um_dda (
 	// assign uio_out = 0;
 	assign uio_oe = 8'b00100000;
 	assign uo_out  = 0;
+	assign uio_out[7] = 1'b0;
+	assign uio_out[6] = 1'b0;
+	assign uio_out[5] = 1'b0;
+	assign uio_out[4] = 1'b0;
+	assign uio_out[3] = 1'b0;
+	assign uio_out[1] = 1'b0;
+	assign uio_out[0] = 1'b0;
 
 	parameter N = 16;
 	parameter ES = 1;
