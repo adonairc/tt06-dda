@@ -21,8 +21,6 @@ module tt_um_dda (
 	assign uio_oe  = 0;
 	// assign uo_out  = 0;
 
-	
-
 	parameter N = 16;
 	parameter ES = 1;
 	parameter REG_SIZE = 6; // Register file size in bytes
@@ -30,7 +28,7 @@ module tt_um_dda (
 	// parameter CLK_FREQ = 12000000; // Clock frequency (12 MHz)
 	// parameter BAUD_RATE = 9600; // UART baud rate
 
-	wire rst;
+	reg rst;
 	assign rst = ~rst_n;
 
 	// // Connect UART pins
@@ -73,10 +71,10 @@ module tt_um_dda (
 	reg en_dda;
 
 	// state variables
-	wire [N-1:0] x,y,z;
+	wire [N-1:0] x,y;
 
 	//Lorenz  DDA instance
-	dda #(.N(N), .ES(ES)) lorenz(
+	dda #(.N(N), .ES(ES)) van_der_pol(
 		.clk(clk),
 		.rst(rst),
 		.en(en_dda),
@@ -88,7 +86,7 @@ module tt_um_dda (
 		.dt(dt)
 	);
 
-	reg [7:0] parameters [REG_SIZE];
+	reg [N-1:0] parameters [REG_SIZE];
 	// reg [7:0] rx_counter, tx_counter;
 	// wire [7:0] state [OUT_SIZE];
 
@@ -100,14 +98,10 @@ module tt_um_dda (
 			en_dda <= 1'b1;
 
 			// Initial settings
-			parameters[0] <= 8'hC0; // icx = -1.0
-			parameters[1] <= 8'h00;
-			
-			parameters[2] <= 8'h14;  // icy = 0.1
-			parameters[3] <= 8'hCD; 
-			
-			parameters[4] <= 8'h72; // mu = 25.0
-			parameters[5] <= 8'h40; 
+			parameters[0] <= 16'hC000;  // icx = -1.0
+			parameters[1] <= 16'h14CD;  // icy = 0.1
+			parameters[2] <= 16'h14DD;  // mu
+			parameters[3] <= 16'h7240;  // dt = 1/256
 		end
 
 		// uart_transmit <= 1'b1;
@@ -128,10 +122,10 @@ module tt_um_dda (
 	// assign state[5] = z[7:0];
 
 	// 7 parameters
-	assign icx = {parameters[0], parameters[1]};
-	assign icy = {parameters[2], parameters[3]};
-	assign mu = {parameters[4], parameters[5]};
-	assign dt = {parameters[6], parameters[7]};
+	assign icx = parameters[0];
+	assign icy = parameters[1];
+	assign mu = parameters[2];
+	assign dt = parameters[3];
 
 	assign uo_out = x[7:0];
 	assign uio_out = y[7:0];
