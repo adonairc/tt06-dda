@@ -18,8 +18,8 @@ module tt_um_dda (
 	// All output pins must be assigned. If not used, assign to 0.
 	// assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
 	// assign uio_out = 0;
-	assign uio_oe  = 0;
-	// assign uo_out  = 0;
+	assign uio_oe = 8'b00100000;
+	assign uo_out  = 0;
 
 	parameter N = 16;
 	parameter ES = 1;
@@ -61,8 +61,24 @@ module tt_um_dda (
 	// 	.is_transmitting(uart_is_transmitting),// Low when transmit line is idle
 	// 	.recv_error(uart_recv_error)           // Indicates error in receiving packet
 	// );
+	reg spi_rx_dv, spi_tx_dv;
+	reg [7:0] spi_tx_byte, spi_rx_byte;
 
+	// SPI
+	spi_slave spi0(
+		.i_Rst_L(rst_n),
+		.i_Clk(clk),
+		.o_RX_DV(spi_rx_dv),
+		.o_RX_Byte(spi_rx_byte),
+		.i_TX_DV(spi_tx_dv),
+		.i_TX_Byte(spi_tx_byte),
+		.i_SPI_Clk(uio_in[3]),
+		.o_SPI_MISO(uio_out[2]),
+		.i_SPI_MOSI(uio_in[1]),
+		.i_SPI_CS_n(uio_in[0]) // active low
+	);
 
+	
 	// Dynamical system parameters
 	wire [N-1:0] icx, icy;
     wire [N-1:0] k,d;
@@ -86,14 +102,15 @@ module tt_um_dda (
 
 	reg [N-1:0] parameters [REG_SIZE];
 	// reg [7:0] rx_counter, tx_counter;
-	// wire [7:0] state [OUT_SIZE];
+	reg[3:0] tx_counter;
+	wire [7:0] state [4];
 
 	always @(posedge clk) begin
 		if (rst) begin
 			// rx_counter <= 1'b0;
-			// tx_counter <= 1'b0;
-			// uart_transmit <= 1'b1;
+			tx_counter <= 1'b0;
 			en_dda <= 1'b1;
+			spi_tx_dv <= 1'b1;
 
 			// Initial settings
 			parameters[0] <= 16'hC000;  // icx = -1.0
@@ -101,7 +118,13 @@ module tt_um_dda (
 			parameters[2] <= 16'h14DD;  // k = 
 			parameters[3] <= 16'h14DD;  // d = 
 		end
+		// Update parameters
+		// if(spi_rx_dv) begin
+			
+		// end
 
+		// Transmit state
+		spi_tx_byte <= state[tx_counter];
 		// uart_transmit <= 1'b1;
 		// if (tx_counter < OUT_SIZE) begin
 		// 	uart_tx_byte <= state[tx_counter];
@@ -111,13 +134,11 @@ module tt_um_dda (
 		// end
 	end
 
-	// 3 state variables
-	// assign state[0] = x[15:8];
-	// assign state[1] = x[7:0];
-	// assign state[2] = y[15:8];
-	// assign state[3] = y[7:0];
-	// assign state[4] = z[15:8];
-	// assign state[5] = z[7:0];
+	// 2 state variables
+	assign state[0] = x[15:8];
+	assign state[1] = x[7:0];
+	assign state[2] = y[15:8];
+	assign state[3] = y[7:0];
 
 	// 7 parameters
 	assign icx = parameters[0];
@@ -125,6 +146,6 @@ module tt_um_dda (
 	assign k = parameters[2];
 	assign d = parameters[3];
 
-	assign uo_out = x[7:0];
-	assign uio_out = y[7:0];
+	
+
 endmodule

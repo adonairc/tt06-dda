@@ -1,8 +1,8 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg)
 
-# DDA solver for Lorenz equations
+# DDA solver for damped spring-mass problem
 
-Hardware accelerator to solve Lorenz nonlinear differential equations submitted to [TinyTapeout 6](https://tinytapeout.com). 
+16-bit hardware accelerator to solve the damped-spring-mass differential equations submitted to [TinyTapeout 6](https://tinytapeout.com). 
 - [Read the technical documentation for this project](docs/info.md)
 
 ## What is a DDA solver?
@@ -18,7 +18,6 @@ $$
 \frac{dz}{dt} &= xy - \beta z
 \end{align}
 $$
-
 
 
 ![image](lorenz_dda.png)

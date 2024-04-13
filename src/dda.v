@@ -4,7 +4,7 @@ module dda (
 	input en,
     output [N-1:0] x,y, // Dynamic system state variables
     input [N-1:0] icx, icy, // Initial conditions
-    input [N-1:0] k,d// Parameters
+    input [N-1:0] k,d // Parameters
 );
 
 // Posit parameters
@@ -30,21 +30,6 @@ euler_integrator  #(.N(N),.ES(ES)) int1(.out(x), .funct(y), .ic(icx), .clk(clk),
 euler_integrator  #(.N(N),.ES(ES)) int2(.out(y), .funct(w_neg_sub1), .ic(icy), .clk(clk), .rst(rst), .en(en));
 
 endmodule
-
-// // Substracts two posits
-// module posit_sub (
-// 	input [N-1:0] in1, in2,
-// 	output [N-1:0] out
-// );
-// 	parameter N = 16;
-// 	parameter ES = 1;
-
-// 	wire [N-1:0] minus_in2;
-// 	assign minus_in2 = {~in2[N-1],~in2[N-2:0]+1'b1};
-
-// 	posit_add #(.N(N),.ES(ES)) sub(.in1(in1), .in2(minus_in2), .out(out));
-// endmodule
-
 
 
 /// Euler integrator
