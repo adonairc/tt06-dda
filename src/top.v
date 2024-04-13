@@ -109,7 +109,7 @@ module tt_um_dda (
 
 	reg [N-1:0] parameters [REG_SIZE];
 	// reg [7:0] rx_counter, tx_counter;
-	reg[3:0] tx_counter;
+	reg[2:0] tx_counter;
 	wire [7:0] state [4];
 
 	always @(posedge clk) begin
