@@ -151,7 +151,9 @@ module spi_slave
   // Purpose: Transmits 1 SPI Byte whenever SPI clock is toggling
   // Will transmit read data back to SW over MISO line.
   // Want to put data on the line immediately when CS goes low.
-  always @(posedge w_SPI_Clk or posedge i_SPI_CS_n)
+//   always @(posedge w_SPI_Clk or posedge i_SPI_CS_n)
+
+  always @(posedge w_SPI_Clk)
   begin
     if (i_SPI_CS_n)
     begin
