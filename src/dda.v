@@ -22,8 +22,14 @@ posit_mult #(.N(N),.ES(ES)) mult3(.in1(w_mult2), .in2(y), .out(w_mult3)); // Mul
 // Subtractions
 wire [N-1:0] w_sub1, w_sub2;
 
-posit_sub #(.N(N),.ES(ES)) sub_1_mult_x_x(.in1(16'b0100000000000000), .in2(w_mult1), .out(w_sub1)); // Subtract 1 - x*x
-posit_sub #(.N(N),.ES(ES)) sub_rho_z(.in1(w_mult3), .in2(x), .out(w_sub2)); // Subtract mu*(1-x*x)y - x
+wire [N-1:0] w_neg_mult1;
+assign w_neg_mult1 = {~w_mult1[N-1], ~w_mult1[N-2:0]+1'b1};
+
+wire [N-1:0] w_neg_x;
+assign w_neg_x = {~x[N-1], ~x[N-2:0]+1'b1};
+
+posit_add #(.N(N),.ES(ES)) sub_1_mult_x_x(.in1(16'b0100000000000000), .in2(w_neg_mult1), .out(w_sub1)); // Subtract 1 - x*x
+posit_add #(.N(N),.ES(ES)) sub_rho_z(.in1(w_mult3), .in2(w_neg_x), .out(w_sub2)); // Subtract mu*(1-x*x)y - x
 
 // Van der Pol equation
 // dx/dt = y
@@ -35,18 +41,18 @@ euler_integrator  #(.N(N),.ES(ES)) int2(.out(y), .funct(w_sub2), .dt(dt), .ic(ic
 endmodule
 
 // Substracts two posits
-module posit_sub (
-	input [N-1:0] in1, in2,
-	output [N-1:0] out
-);
-	parameter N = 16;
-	parameter ES = 1;
+// module posit_sub (
+// 	input [N-1:0] in1, in2,
+// 	output [N-1:0] out
+// );
+// 	parameter N = 16;
+// 	parameter ES = 1;
 
-	wire [N-1:0] minus_in2;
-	assign minus_in2 = {~in2[N-1],~in2[N-2:0]+1'b1};
+// 	wire [N-1:0] minus_in2;
+// 	assign minus_in2 = {~in2[N-1],~in2[N-2:0]+1'b1};
 
-	posit_add #(.N(N),.ES(ES)) sub(.in1(in1), .in2(minus_in2), .out(out));
-endmodule
+// 	posit_add #(.N(N),.ES(ES)) sub(.in1(in1), .in2(minus_in2), .out(out));
+// endmodule
 
 
 
